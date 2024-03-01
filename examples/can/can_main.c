@@ -136,33 +136,37 @@ static void show_usage(FAR const char *progname)
 
 int main(int argc, FAR char *argv[])
 {
+  
+
+
   struct canioc_bittiming_s bt;
 
 #ifdef CONFIG_EXAMPLES_CAN_WRITE
-  struct can_msg_s txmsg =
-  {
-    0
-  };
-
+  struct can_msg_s txmsg;
 #ifdef CONFIG_CAN_EXTID
   bool extended = true;
-  uint32_t msgid;
+  uint32_t msgid=21;
 #else
-  uint16_t msgid;
+  uint16_t msgid=21;
 #endif
-  long minid    = 1;
+  long minid    = 21;
   long maxid    = MAX_ID;
-  uint8_t msgdata;
+  uint8_t msgdata[8];
+  msgdata[0]='1';
+  msgdata[1]='1';
+  msgdata[2]='1';
+  msgdata[3]='1';
+  msgdata[4]='1';
+  msgdata[5]='1';
+  msgdata[6]='1';
+  msgdata[7]='1';
+
 #endif
-  int msgdlc;
+  int msgdlc=8;
   int i;
 
 #ifdef CONFIG_EXAMPLES_CAN_READ
-  struct can_msg_s rxmsg =
-  {
-    0
-  };
-
+  struct can_msg_s rxmsg;
 #endif
 
   size_t msgsize;
@@ -177,6 +181,16 @@ int main(int argc, FAR char *argv[])
   int ret;
 
   /* Parse command line parameters */
+
+
+  msgdata[0]='1';
+  msgdata[1]='1';
+  msgdata[2]='1';
+  msgdata[3]='1';
+  msgdata[4]='1';
+  msgdata[5]='1';
+  msgdata[6]='1';
+  msgdata[7]='1';
 
   while ((option = getopt(argc, argv, OPT_STR)) != ERROR)
     {
@@ -257,6 +271,8 @@ int main(int argc, FAR char *argv[])
     }
 #endif
 
+
+
   if (optind != argc)
     {
       fprintf(stderr, "ERROR: Garbage on command line\n");
@@ -264,7 +280,10 @@ int main(int argc, FAR char *argv[])
       return EXIT_FAILURE;
     }
 
-  printf("nmsgs: %ld\n", nmsgs);
+
+ // printf("can debugg point  n mesaage\n");
+
+  printf("\nnmsgs: %ld\n", nmsgs);
 #ifdef CONFIG_EXAMPLES_CAN_WRITE
   printf("min ID: %ld max ID: %ld\n", minid, maxid);
 #endif
@@ -274,6 +293,8 @@ int main(int argc, FAR char *argv[])
    */
 
   /* Open the CAN device for reading */
+
+  //printf("can debugg point main\n \n");
 
   fd = open(CONFIG_EXAMPLES_CAN_DEVPATH, CAN_OFLAGS);
   if (fd < 0)
@@ -306,10 +327,20 @@ int main(int argc, FAR char *argv[])
    * on each pass.
    */
 
+
+
 #ifdef CONFIG_EXAMPLES_CAN_WRITE
-  msgdlc  = 1;
+  msgdlc  = 8;
   msgid   = minid;
-  msgdata = 0;
+//  msgdata = 1;
+  msgdata[0]='1';
+  msgdata[1]='1';
+  msgdata[2]='1';
+  msgdata[3]='1';
+  msgdata[4]='1';
+  msgdata[5]='1';
+  msgdata[6]='1';
+  msgdata[7]='1';
 #endif
 
   for (msgno = 0; !nmsgs || msgno < nmsgs; msgno++)
@@ -323,6 +354,7 @@ int main(int argc, FAR char *argv[])
 #ifdef CONFIG_EXAMPLES_CAN_WRITE
 
       /* Construct the next TX message */
+    //  printf("CAN MAIN write\n");
 
       txmsg.cm_hdr.ch_id     = msgid;
       txmsg.cm_hdr.ch_rtr    = false;
@@ -337,7 +369,7 @@ int main(int argc, FAR char *argv[])
 
       for (i = 0; i < msgdlc; i++)
         {
-          txmsg.cm_data[i] = msgdata + i;
+          txmsg.cm_data[i] = msgdata[i] ;
         }
 
       /* Send the TX message */
@@ -359,6 +391,7 @@ int main(int argc, FAR char *argv[])
 
       /* Read the RX message */
 
+   //  printf("can read message\n");
       msgsize = sizeof(struct can_msg_s);
       nbytes = read(fd, &rxmsg, msgsize);
       if (nbytes < CAN_MSGLEN(0) || nbytes > msgsize)
@@ -371,12 +404,16 @@ int main(int argc, FAR char *argv[])
 
       printf("  ID: %4" PRI_CAN_ID " DLC: %u\n",
              rxmsg.cm_hdr.ch_id, rxmsg.cm_hdr.ch_dlc);
-
+             
+      
       msgdlc = rxmsg.cm_hdr.ch_dlc;
+
+
+//#endif
 
 #ifdef CONFIG_CAN_ERRORS
       /* Check for error reports */
-
+    
       if (rxmsg.cm_hdr.ch_error != 0)
         {
           printf("ERROR: CAN error report: [0x%04" PRI_CAN_ID "]\n",
@@ -433,7 +470,7 @@ int main(int argc, FAR char *argv[])
 #if defined(CONFIG_EXAMPLES_CAN_WRITE) && defined(CONFIG_CAN_LOOPBACK)
 
           /* Verify that the received messages are the same */
-
+     //   printf("info from main loop and write\n");
           if (memcmp(&txmsg.cm_hdr, &rxmsg.cm_hdr,
                      sizeof(struct can_hdr_s)) != 0)
             {
@@ -481,19 +518,33 @@ int main(int argc, FAR char *argv[])
 
       /* Set up for the next pass */
 
-      msgdata += msgdlc;
+     // msgdata += msgdlc;
 
-      if (++msgid > maxid)
+     usleep(1* 1000L);
+
+  msgdata[0]='N';
+  msgdata[1]='0';
+  msgdata[2]='0';
+  msgdata[3]='0';
+  msgdata[4]='0';
+  msgdata[5]='0';
+  msgdata[6]='1';
+  msgdata[7]='1';
+
+
+
+      if (msgid > maxid)
         {
           msgid = minid;
         }
 
-      if (++msgdlc > CAN_MAXDATALEN)
+      if (msgdlc > CAN_MAXDATALEN)
         {
           msgdlc = 1;
         }
 #endif
     }
+
 
 errout_with_dev:
   close(fd);

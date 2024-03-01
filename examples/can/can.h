@@ -42,13 +42,13 @@
  *
  * CONFIG_CAN_LOOPBACK
  * CONFIG_EXAMPLES_CAN_DEVPATH - The path to the CAN device. Default: /dev/can0
- * CONFIG_EXAMPLES_CAN_NMSGS - This number of CAN message is collected and
+: * CONFIG_EXAMPLES_CAN_NMSGS - This number of CAN message is collected and
  *   the program terminates. Default: 32.
  * CONFIG_EXAMPLES_CAN_READ - Only receive messages
  * CONFIG_EXAMPLES_CAN_WRITE - Only send messages
- * CONFIG_EXAMPLES_CAN_READWRITE - Receive and send messages
+*CONFIG_EXAMPLES_CAN_READWRITE - Receive and send messages
  */
-
+//#define  CONFIG_EXAMPLES_CAN_READWRITE 
 #ifndef CONFIG_CAN
 #  error "CAN device support is not enabled (CONFIG_CAN)"
 #endif
